@@ -1,0 +1,62 @@
+html, body {
+  height: 100%;
+  font-family: Arial, sans-serif;    
+  color: #3C8BAC;
+}
+
+a {
+	color: #3C8BAC;
+}
+
+body {
+  background-position: center -450px;
+  background-repeat: no-repeat;
+  background-image: url("../assets/background.jpg"), -webkit-radial-gradient(center, ellipse cover,#FFFFFF 0%,#FAFAFA 50%,#F5F5F5 60%,#BEBEBE 100%);
+  margin: 0;
+  padding: 0;
+}
+
+#title {
+  position: absolute;
+  text-align: center;
+  width: 100%;
+  line-height: 120%;
+  letter-spacing: -0.05em;
+}
+
+#webview {
+	position: absolute;
+	top: 220px;
+	width: 100%;
+	height: 490px;
+	visibility: hidden;
+}
+
+#message {
+	position: absolute;
+	text-align: center;
+	width: 100%;
+	top: 50%;
+	font-size: 40px;
+	visibility: hidden;
+}
+
+#players {
+	position: absolute;
+	width: 50%;
+	left: 25%;
+	top:220px;
+	font-size: 27px;
+}
+
+#credit {
+	position: absolute;
+	right: 30px;
+	bottom: 10px;
+}
+
+#disconnect {
+	position: absolute;
+	left: 30px;
+	bottom: 10px;
+}

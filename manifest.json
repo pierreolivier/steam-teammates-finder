@@ -1,0 +1,20 @@
+{
+	"manifest_version": 2,
+	"name": "Awesomenauts Teammates Finder",
+	"version": "0.1",
+	"minimum_chrome_version": "23",
+	"icons": {
+		"16": "icon_16.png",
+		"128": "icon_128.png"
+	},
+	"app": {
+		"background": {		
+			"scripts": ["main.js"]
+		}
+	},
+	"permissions": [
+		"webview",
+		"http://steamcommunity.com/",
+		"https://steamcommunity.com/"
+	]
+}
