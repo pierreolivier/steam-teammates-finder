@@ -1,9 +1,14 @@
 var isLoading = false;
-var url = "";
 var isConnected = false;
+var url = "";
+
 var profileType = "profiles";
 var profileName = "";
+
 var timer;
+
+var currentPlayers = new Array();
+var cachePlayers = new Array();
 
 onload = function() {
 	var webview = document.querySelector('webview');
@@ -13,7 +18,10 @@ onload = function() {
 	
 	document.getElementById("disconnect").onclick = function () {
 		clearTimeout(timer);
+		
 		webview.src = "https://steamcommunity.com/login/logout";
+		
+		showMessage("Disconnection...");
 	};
 	
 	document.getElementById('player_0').addEventListener('loadstop', handleLoadStopPlayer0);
@@ -25,13 +33,9 @@ onload = function() {
 	showMessage("Initialization...");
 	
 	function handleLoadStart(event) {
-		isLoading = true;	
+		isLoading = true;
 		
 		webview.style.visibility = "hidden";
-		
-		if(event.url == "https://steamcommunity.com/login/logout") {
-			showMessage("Disconnection...");
-		}
 	}
 	
 	function handleLoadStop(event) {
@@ -57,10 +61,15 @@ onload = function() {
 				}
 			});
 		} else if (url == getFriendsPlayersUrl()) {
-			// started game
+			// handle a started game
+			
+			// reset current players
+			currentPlayers = new Array();
+			
 			webview.executeScript({ code: "document.getElementById('memberList').innerHTML" }, function(result) {			
 				result = new String(result);
 				
+				// if no result, change the profileType from profiles (default value) to id
 				if(result.length == 0) {
 					profileType = "id";
 					webview.src = getFriendsPlayersUrl();
@@ -70,29 +79,44 @@ onload = function() {
 				var tokens = result.split('linkFriend_');
 				var number = 0;
 				
+				// for each player in the lobby
 				for(i=1;i<tokens.length;i++) {
 					var connectionTokens = tokens[i].split('href="');
 					var linkTokens = connectionTokens[1].split('">');
 					var nameTokens = linkTokens[1].split('</a><br>');
 					var profileUrl = linkTokens[0];
 					var name = nameTokens[0];
+					
 					number++;
 					
+					// add a player
+					currentPlayers[i - 1] = profileUrl;
+					
+					// set player name
 					setName(i - 1, name, profileUrl);
-					document.getElementById('player_' + (i - 1)).src = profileUrl + "/games?tab=all";
+					
+					// set player hours played
+					if(cachePlayers[profileUrl] == undefined) {
+						document.getElementById('player_' + (i - 1)).src = profileUrl + "/games?tab=all";
+					} else {
+						setHours(i - 1, cachePlayers[profileUrl]);
+					}
 				}
 				
-				for(i=tokens.length - 1;i<5;i++) {
+				// clear the end of players div
+				for(i = tokens.length - 1 ; i < 5 ; i++) {
 					setName(i, "", "");
 					setHours(i, "");
 				}
 				
+				// if no player, show a message
 				if(number == 0) {
 					showMessage("Empty lobby");	
 				} else {
 					hideMessage();
 				}
 				
+				// pulling
 				clearTimeout(timer);
 				timer = setTimeout(function() {
 					webview.src = getFriendsPlayersUrl();
@@ -101,57 +125,42 @@ onload = function() {
 			
 			
 		} else if (url == getFriendsUrl()) {
-			// no started game
+			// handle awesomenauts not started
+			
+			// clear players div
 			for(i=0;i<5;i++) {
 				setName(i, "", "");
 				setHours(i, "");
 			}
-		
+			
+			// show the message
 			showMessage("Awesomenauts is not started<br /><a href='steam://run/204300' target='_blank'>Launch</a>");
 			
+			// pulling
 			clearTimeout(timer);
 			timer = setTimeout(function() {
 				webview.src = getFriendsPlayersUrl();
 			}, 6000);
 		} else if (url == "https://steamcommunity.com/login/home/?goto=0") {
-			// connection to steam community
+			// handle a connection to steam community
+			
+			// hide message
 			hideMessage();
+			
+			// show the webview
 			webview.style.visibility = 'visible';
 		} else if (url.match("^http://steamcommunity.com/id/.*/home$") != null) {
 			// check if connected to steam community
 			webview.executeScript({ code: "document.getElementsByClassName('menuitem supernav username')[0].href" }, function(result) {
-				result = new String(result);
-				
-				if(result == "") {
-					isConnected = false;
-					
-					webview.src = "https://steamcommunity.com/login/home/?goto=0";
-				} else {
-					profileType = "id";
-					profileName = result.split("/")[4];
-					isConnected = true;
-					
-					webview.src = getFriendsPlayersUrl();
-				}
+				handleConnected(new String(result), "id");
 			});
 		} else if (url.match("^http://steamcommunity.com/profiles/.*/home$") != null) {
 			// check if connected to steam community
-			webview.executeScript({ code: "document.getElementsByClassName('menuitem supernav username')[0].href" }, function(result) {
-				result = new String(result);
-				
-				if(result == "") {
-					isConnected = false;
-					
-					webview.src = "https://steamcommunity.com/login/home/?goto=0";
-				} else {
-					profileType = "profiles";
-					profileName = result.split("/")[4];
-					isConnected = true;
-					
-					webview.src = getFriendsPlayersUrl();
-				}
+			webview.executeScript({ code: "document.getElementsByClassName('menuitem supernav username')[0].href" }, function(result) {				
+				handleConnected(new String(result), "profiles");
 			});
 		} else {
+			// redirect to the default page
 			webview.src = "http://steamcommunity.com/discussions/";
 		}
 	}
@@ -179,8 +188,31 @@ onload = function() {
 	function handleHoursPlayed(player) {
 		document.getElementById('player_' + player).executeScript({ code: 'document.getElementById("game_204300").innerHTML.split("<h5>")[1].split(" ")[0]' }, function(result) {
 			result = new String(result);
+			
+			// add to the cache
+			if(currentPlayers[player] != undefined) {
+				cachePlayers[currentPlayers[player]] = result;
+			}
+			
+			// show hours played
 			setHours(player, result);
 		});
+	}
+	
+	function handleConnected(url, type) {
+		if(url == "") {
+			// no connected
+			isConnected = false;
+			
+			webview.src = "https://steamcommunity.com/login/home/?goto=0";
+		} else {
+			// connected
+			profileType = type;
+			profileName = url.split("/")[4];
+			isConnected = true;
+			
+			webview.src = getFriendsPlayersUrl();
+		}
 	}
 	
 	function setName(player, name, link) {
