@@ -11,10 +11,32 @@ var currentPlayers = new Array();
 var cachePlayers = new Array();
 
 onload = function() {
+	showMessage("Initialization...");
+
 	var webview = document.querySelector('webview');
+	var players = document.getElementById("players");
+	var recentlyPlayedWith = document.getElementById("recently_played_with_panel");
 	
 	webview.addEventListener('loadstart', handleLoadStart);
 	webview.addEventListener('loadstop', handleLoadStop);
+	
+	document.getElementById('player_0').addEventListener('loadstop', handleLoadStopPlayer0);
+	document.getElementById('player_1').addEventListener('loadstop', handleLoadStopPlayer1);
+	document.getElementById('player_2').addEventListener('loadstop', handleLoadStopPlayer2);
+	document.getElementById('player_3').addEventListener('loadstop', handleLoadStopPlayer3);
+	document.getElementById('player_4').addEventListener('loadstop', handleLoadStopPlayer4);
+	
+	document.getElementById('lobby').onclick = function () {
+		recentlyPlayedWith.style.visibility = "hidden";
+		players.style.visibility = "visible";
+		document.getElementById('message_box').style.display = "initial";
+	}
+	
+	document.getElementById('recently_played_with').onclick = function () {		
+		players.style.visibility = "hidden";
+		document.getElementById('message_box').style.display = "none";
+		recentlyPlayedWith.style.visibility = "visible";
+	}
 	
 	document.getElementById("disconnect").onclick = function () {
 		clearTimeout(timer);
@@ -23,14 +45,6 @@ onload = function() {
 		
 		showMessage("Disconnection...");
 	};
-	
-	document.getElementById('player_0').addEventListener('loadstop', handleLoadStopPlayer0);
-	document.getElementById('player_1').addEventListener('loadstop', handleLoadStopPlayer1);
-	document.getElementById('player_2').addEventListener('loadstop', handleLoadStopPlayer2);
-	document.getElementById('player_3').addEventListener('loadstop', handleLoadStopPlayer3);
-	document.getElementById('player_4').addEventListener('loadstop', handleLoadStopPlayer4);
-	
-	showMessage("Initialization...");
 	
 	function handleLoadStart(event) {
 		isLoading = true;
@@ -96,10 +110,12 @@ onload = function() {
 					setName(i - 1, name, profileUrl);
 					
 					// set player hours played
-					if(cachePlayers[profileUrl] == undefined) {
+					if(cachePlayers[profileUrl] == undefined) {						
+						cachePlayers[profileUrl] = new Array();
+						cachePlayers[profileUrl]["name"] = name;
 						document.getElementById('player_' + (i - 1)).src = profileUrl + "/games?tab=all";
 					} else {
-						setHours(i - 1, cachePlayers[profileUrl]);
+						setHours(i - 1, cachePlayers[profileUrl]["hours"]);
 					}
 				}
 				
@@ -191,11 +207,14 @@ onload = function() {
 			
 			// add to the cache
 			if(currentPlayers[player] != undefined) {
-				cachePlayers[currentPlayers[player]] = result;
+				cachePlayers[currentPlayers[player]]["hours"] = result;
 			}
 			
 			// show hours played
 			setHours(player, result);
+			
+			// update recently played with panel
+			updateRecentlyPlayedWith();
 		});
 	}
 	
@@ -224,6 +243,21 @@ onload = function() {
 			document.getElementById('hours_player_' + player).innerHTML = hours + " hours played";
 		else
 			document.getElementById('hours_player_' + player).innerHTML = "";
+	}
+	
+	function updateRecentlyPlayedWith() {
+		var html = "";		
+		
+		for(var link in cachePlayers) {
+			if(cachePlayers[link]["hours"] == "") {
+				html = "private profile<br /><br />" + html;
+			} else {
+				html = cachePlayers[link]["hours"] + " hours played<br /><br />" + html;
+			}
+			html = "<a href='" + link + "' target='_blank'>" + cachePlayers[link]["name"] + "</a><br />" + html;
+		}
+		
+		recentlyPlayedWith.innerHTML = html;
 	}
 	
 	function getFriendsUrl() {

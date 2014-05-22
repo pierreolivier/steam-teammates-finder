@@ -32,7 +32,7 @@ body {
 	visibility: hidden;
 }
 
-#message {
+#message_box {
 	position: absolute;
 	text-align: center;
 	width: 100%;
@@ -46,7 +46,19 @@ body {
 	width: 50%;
 	left: 25%;
 	top:220px;
-	font-size: 27px;
+	font-size: 27px;	
+	visibility: visible;
+}
+
+#recently_played_with_panel {
+	position: absolute;
+	width: 50%;
+	left: 25%;
+	top:220px;
+	font-size: 20px;
+	overflow-y: scroll;
+	height:450px;	
+	visibility: hidden;
 }
 
 #credit {
@@ -55,8 +67,25 @@ body {
 	bottom: 10px;
 }
 
-#disconnect {
+.link  a{
+	text-decoration:underline;
+	cursor:pointer;
+}
+
+#lobby {
 	position: absolute;
 	left: 30px;
+	bottom: 10px;
+}
+
+#recently_played_with {
+	position: absolute;
+	left: 75px;
+	bottom: 10px;
+}
+
+#disconnect {
+	position: absolute;
+	left: 195px;
 	bottom: 10px;
 }

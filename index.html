@@ -9,7 +9,7 @@
 <body>
     <h1 id="title">Teammates Finder</h1>	
 	
-	<div id="message">Awesomenauts is not started</div>
+	<div id="message_box"><span id="message">Awesomenauts is not started</span></div>
 	
 	<div id="players">
 		<div id="name_player_0"></div>
@@ -24,11 +24,15 @@
 		<div id="hours_player_4"></div><br />
 	</div>
 	
-	<div id="disconnect">disconnect</div>
+	<div id="recently_played_with_panel"></div>
+	
+	<div id="lobby" class="link"><a>lobby</a></div>
+	<div id="recently_played_with" class="link"><a>recently played with</a></div>
+	<div id="disconnect" class="link"><a>disconnect</a></div>
 	
 	<webview id="webview" src="http://steamcommunity.com/discussions/" partition="persist:googlepluswidgets"></webview>	
 		
-	<div id="credit">version <a href="https://github.com/pierreolivier/awesomenauts-teammates-finder" target="_blank">0.11</a> created by <a href="http://steamcommunity.com/id/pierr/" target="_blank">p.o</a></div>	
+	<div id="credit">version <a href="https://github.com/pierreolivier/awesomenauts-teammates-finder" target="_blank">0.12</a> created by <a href="http://steamcommunity.com/id/pierr/" target="_blank">p.o</a></div>	
 	
 	<webview id="player_0" src="" style="width: 0px; height: 0px; visibility:hidden" partition="persist:googlepluswidgets"></webview>
 	<webview id="player_1" src="" style="width: 0px; height: 0px; visibility:hidden" partition="persist:googlepluswidgets"></webview>
