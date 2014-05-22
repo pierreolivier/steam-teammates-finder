@@ -61,6 +61,12 @@ body {
 	visibility: hidden;
 }
 
+#update {
+	position: absolute;
+	right: 190px;
+	bottom: 10px;
+}
+
 #credit {
 	position: absolute;
 	right: 30px;

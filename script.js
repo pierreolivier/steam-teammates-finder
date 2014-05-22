@@ -46,6 +46,8 @@ onload = function() {
 		showMessage("Disconnection...");
 	};
 	
+	checkVersion();
+	
 	function handleLoadStart(event) {
 		isLoading = true;
 		
@@ -258,6 +260,30 @@ onload = function() {
 		}
 		
 		recentlyPlayedWith.innerHTML = html;
+	}
+	
+	function checkVersion() {
+		var xhrOnline = new XMLHttpRequest();
+		xhrOnline.open('GET', 'https://raw.githubusercontent.com/pierreolivier/awesomenauts-teammates-finder/master/app.version', true);
+		xhrOnline.onload = function(e) {
+			if (this.status == 200) {
+				var onlineVersion = this.responseText;
+				var xhrLocal = new XMLHttpRequest();
+				xhrLocal.open('GET', 'app.version', true);
+				xhrLocal.onload = function(e) {
+					document.getElementById('version').innerHTML = this.responseText;
+					if (this.status == 200) {
+						if(onlineVersion != this.responseText) {
+							document.getElementById('new_version').innerHTML = "Update (" + onlineVersion + ") !";
+						}
+					}
+				};
+				xhrLocal.send();
+			}
+		};
+		xhrOnline.send();
+		
+		
 	}
 	
 	function getFriendsUrl() {
