@@ -1,6 +1,7 @@
 var isLoading = false;
 var isConnected = false;
 var url = "";
+var version = "";
 
 var profileType = "profiles";
 var profileName = "";
@@ -8,7 +9,7 @@ var profileName = "";
 var timer;
 
 var currentPlayers = new Array();
-var cachePlayers = new Array();
+var cachePlayers = {};
 
 onload = function() {
 	showMessage("Initialization...");
@@ -45,6 +46,11 @@ onload = function() {
 		
 		showMessage("Disconnection...");
 	};
+	
+	chrome.storage.local.get('cachePlayers', function(items) {
+		cachePlayers = items['cachePlayers'];
+		console.log(cachePlayers);
+	});
 	
 	checkVersion();
 	
@@ -116,12 +122,16 @@ onload = function() {
 					setName(i - 1, name, profileUrl);
 					
 					// set player hours played
-					if(cachePlayers[profileUrl] == undefined) {						
-						cachePlayers[profileUrl] = new Array();
+					if(!isCachedProfile(profileUrl)) {
+						cachePlayers[profileUrl] = {};
 						cachePlayers[profileUrl]["name"] = name;
 						document.getElementById('player_' + (i - 1)).src = profileUrl + "/games?tab=all";
+						
+						console.log("no chache " + name);
 					} else {
 						setHours(i - 1, cachePlayers[profileUrl]["hours"]);
+						
+						console.log("chache " + name);
 					}
 				}
 				
@@ -209,15 +219,19 @@ onload = function() {
 	
 	function handleHoursPlayed(player) {
 		document.getElementById('player_' + player).executeScript({ code: 'document.getElementById("game_204300").innerHTML.split("<h5>")[1].split(" ")[0]' }, function(result) {
-			result = new String(result);
+			hours = new String(result);
 			
 			// add to the cache
 			if(currentPlayers[player] != undefined) {
+				cachePlayers["version"] = version;
 				cachePlayers[currentPlayers[player]]["hours"] = result;
+				cachePlayers[currentPlayers[player]]["time"] = Date.now();
+				
+				chrome.storage.local.set({'cachePlayers': cachePlayers});
 			}
 			
 			// show hours played
-			setHours(player, result);
+			setHours(player, hours);
 			
 			// update recently played with panel
 			updateRecentlyPlayedWith();
@@ -254,6 +268,16 @@ onload = function() {
 			document.getElementById('hours_player_' + player).innerHTML = "";
 	}
 	
+	function isCachedProfile(profileUrl) {
+		if(cachePlayers[profileUrl] == undefined) {
+			return false;
+		} else if (Date.now() - cachePlayers[profileUrl]["time"] > 20000) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	
 	function updateRecentlyPlayedWith() {
 		var html = "";		
 		
@@ -280,6 +304,14 @@ onload = function() {
 				xhrLocal.onload = function(e) {
 					document.getElementById('version').innerHTML = this.responseText;
 					if (this.status == 200) {
+						// reset cache
+						version = this.responseText;
+						if(cachePlayers["version"] != version) {
+							console.log("cache reseted");
+							cachePlayers = {};
+						}
+						
+						// show update version
 						if(onlineVersion != this.responseText) {
 							document.getElementById('new_version').innerHTML = "Update (" + onlineVersion + ") !";
 						}
@@ -289,8 +321,6 @@ onload = function() {
 			}
 		};
 		xhrOnline.send();
-		
-		
 	}
 	
 	function getProfileUrl() {
