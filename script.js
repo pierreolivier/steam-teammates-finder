@@ -49,6 +49,9 @@ onload = function() {
 	
 	chrome.storage.local.get('cachePlayers', function(items) {
 		cachePlayers = items['cachePlayers'];
+		
+		updateRecentlyPlayedWith();
+		
 		console.log(cachePlayers);
 	});
 	
@@ -271,7 +274,7 @@ onload = function() {
 	function isCachedProfile(profileUrl) {
 		if(cachePlayers[profileUrl] == undefined) {
 			return false;
-		} else if (Date.now() - cachePlayers[profileUrl]["time"] > 20000) {
+		} else if (Date.now() - cachePlayers[profileUrl]["time"] > 60000) {
 			return false;
 		} else {
 			return true;
@@ -282,12 +285,14 @@ onload = function() {
 		var html = "";		
 		
 		for(var link in cachePlayers) {
-			if(cachePlayers[link]["hours"] == "") {
-				html = "private profile<br /><br />" + html;
-			} else {
-				html = cachePlayers[link]["hours"] + " hours played<br /><br />" + html;
+			if(link != "version") {
+				if(cachePlayers[link]["hours"] == "") {
+					html = "private profile<br /><br />" + html;
+				} else {
+					html = cachePlayers[link]["hours"] + " hours played<br /><br />" + html;
+				}
+				html = "<a href='" + link + "' target='_blank'>" + cachePlayers[link]["name"] + "</a><br />" + html;
 			}
-			html = "<a href='" + link + "' target='_blank'>" + cachePlayers[link]["name"] + "</a><br />" + html;
 		}
 		
 		recentlyPlayedWith.innerHTML = html;
@@ -307,7 +312,7 @@ onload = function() {
 						// reset cache
 						version = this.responseText;
 						if(cachePlayers["version"] != version) {
-							console.log("cache reseted");
+							console.log("cache resetted");
 							cachePlayers = {};
 						}
 						
