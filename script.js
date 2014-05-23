@@ -48,7 +48,10 @@ onload = function() {
 	};
 	
 	chrome.storage.local.get('cachePlayers', function(items) {
-		cachePlayers = items['cachePlayers'];
+		// cache limit
+		if(Object.size(items['cachePlayers']) < 60) {
+			cachePlayers = items['cachePlayers'];
+		}
 		
 		updateRecentlyPlayedWith();
 		
@@ -349,3 +352,11 @@ onload = function() {
 		document.getElementById('message').style.visibility = "hidden";
 	}
 }
+
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
