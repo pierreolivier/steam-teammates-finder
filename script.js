@@ -71,7 +71,11 @@ onload = function() {
 					webview.src = "https://steamcommunity.com/login/home/?goto=0";
 				} else {
 					profileName = result.split("/")[4];
-					isConnected = true;
+					isConnected = true;	
+			
+					webview.executeScript({ code: "document.getElementsByClassName('menuitem supernav username')[0].innerHTML" }, function(result) {				
+						document.getElementById('profile_name').innerHTML = result;
+					});
 					
 					webview.src = getFriendsPlayersUrl();
 				}
@@ -230,9 +234,12 @@ onload = function() {
 			// connected
 			profileType = type;
 			profileName = url.split("/")[4];
-			isConnected = true;
+			isConnected = true;			
 			
-			webview.src = getFriendsPlayersUrl();
+			webview.executeScript({ code: "document.getElementsByClassName('menuitem supernav username')[0].innerHTML" }, function(result) {				
+				document.getElementById('profile_name').innerHTML = result;
+				webview.src = getFriendsPlayersUrl();
+			});
 		}
 	}
 	
@@ -286,12 +293,16 @@ onload = function() {
 		
 	}
 	
+	function getProfileUrl() {
+		return "http://steamcommunity.com/" + profileType + "/" + profileName;
+	}
+	
 	function getFriendsUrl() {
-		return "http://steamcommunity.com/" + profileType + "/" + profileName + "/friends/";
+		return getProfileUrl() + "/friends/";
 	}
 	
 	function getFriendsPlayersUrl() {
-		return "http://steamcommunity.com/" + profileType + "/" + profileName + "/friends/players/";
+		return getProfileUrl() + "/friends/players/";
 	}
 	
 	function showMessage(message) {

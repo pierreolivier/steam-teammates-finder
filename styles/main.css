@@ -78,6 +78,12 @@ body {
 	cursor:pointer;
 }
 
+#profile_name {
+	position: absolute;
+	left: 30px;
+	bottom: 30px;
+}
+
 #lobby {
 	position: absolute;
 	left: 30px;

@@ -1,0 +1,7 @@
+ban player
+notification if player has less than x hours played
+persist recently played with
+print steam name
+associate players to create a premade
+premade estimation (common friends, private profiles)
+laggy
