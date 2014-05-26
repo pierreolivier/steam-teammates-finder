@@ -43,11 +43,22 @@ body {
 
 #players {
 	position: absolute;
-	width: 50%;
-	left: 25%;
-	top:220px;
+	width: 30%;
+	left: 15%;
+	top: 220px;
 	font-size: 27px;	
 	visibility: visible;
+}
+#teams {
+	position: absolute;
+	width: 40%;
+	right: 5%;
+	top: 220px;
+	font-size: 27px;	
+	visibility: visible;
+}
+#teams_list {
+	font-size: 20px;
 }
 
 #recently_played_with_panel {
@@ -58,7 +69,7 @@ body {
 	font-size: 20px;
 	overflow-y: scroll;
 	height:450px;	
-	visibility: hidden;
+	display: none;
 }
 
 #update {

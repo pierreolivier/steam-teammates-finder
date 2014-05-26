@@ -9,14 +9,19 @@ var profileName = "";
 var timer;
 
 var currentPlayers = new Array();
+var currentFriends = [6,6];
+var clientFriends = [];
 var cachePlayers = {};
+var banPlayers = [];
 
 onload = function() {
-	showMessage("Initialization...");
-
 	var webview = document.querySelector('webview');
 	var players = document.getElementById("players");
+	var teams = document.getElementById("teams");
+	var lobby = document.getElementById("lobby_panel");
 	var recentlyPlayedWith = document.getElementById("recently_played_with_panel");
+	
+	showMessage("Initialization...");
 	
 	webview.addEventListener('loadstart', handleLoadStart);
 	webview.addEventListener('loadstop', handleLoadStop);
@@ -27,16 +32,21 @@ onload = function() {
 	document.getElementById('player_3').addEventListener('loadstop', handleLoadStopPlayer3);
 	document.getElementById('player_4').addEventListener('loadstop', handleLoadStopPlayer4);
 	
+	document.getElementById('friends_client').addEventListener('loadstop', handleLoadStopFriendsClient);
+	document.getElementById('friends_0').addEventListener('loadstop', handleLoadStopFriends0);
+	document.getElementById('friends_1').addEventListener('loadstop', handleLoadStopFriends1);
+	document.getElementById('friends_2').addEventListener('loadstop', handleLoadStopFriends2);
+	document.getElementById('friends_3').addEventListener('loadstop', handleLoadStopFriends3);
+	document.getElementById('friends_4').addEventListener('loadstop', handleLoadStopFriends4);
+	
 	document.getElementById('lobby').onclick = function () {
-		recentlyPlayedWith.style.visibility = "hidden";
-		players.style.visibility = "visible";
-		document.getElementById('message_box').style.display = "initial";
+		recentlyPlayedWith.style.display = "none";
+		lobby.style.display = "initial";
 	}
 	
-	document.getElementById('recently_played_with').onclick = function () {		
-		players.style.visibility = "hidden";
-		document.getElementById('message_box').style.display = "none";
-		recentlyPlayedWith.style.visibility = "visible";
+	document.getElementById('recently_played_with').onclick = function () {
+		lobby.style.display = "none";
+		recentlyPlayedWith.style.display = "initial";
 	}
 	
 	document.getElementById("disconnect").onclick = function () {
@@ -56,6 +66,12 @@ onload = function() {
 		updateRecentlyPlayedWith();
 		
 		console.log(cachePlayers);
+	});
+	
+	chrome.storage.local.get('banPlayers', function(items) {
+		banPlayers = items['banPlayers'];
+		
+		console.log(banPlayers);
 	});
 	
 	checkVersion();
@@ -90,6 +106,7 @@ onload = function() {
 					});
 					
 					webview.src = getFriendsPlayersUrl();
+					document.getElementById('friends_client').src = getFriendsUrl();
 				}
 			});
 		} else if (url == getFriendsPlayersUrl()) {
@@ -97,6 +114,7 @@ onload = function() {
 			
 			// reset current players
 			currentPlayers = new Array();
+			currentFriends = new Array();
 			
 			webview.executeScript({ code: "document.getElementById('memberList').innerHTML" }, function(result) {			
 				result = new String(result);
@@ -105,6 +123,7 @@ onload = function() {
 				if(result.length == 0) {
 					profileType = "id";
 					webview.src = getFriendsPlayersUrl();
+					document.getElementById('friends_client').src = getFriendsUrl();
 					return;
 				}
 				
@@ -132,6 +151,7 @@ onload = function() {
 						cachePlayers[profileUrl] = {};
 						cachePlayers[profileUrl]["name"] = name;
 						document.getElementById('player_' + (i - 1)).src = profileUrl + "/games?tab=all";
+						document.getElementById('friends_' + (i - 1)).src = profileUrl + "/friends";
 						
 						console.log("no chache " + name);
 					} else {
@@ -139,7 +159,9 @@ onload = function() {
 						
 						console.log("chache " + name);
 					}
-				}
+				}			
+				
+				updatePremades();
 				
 				// clear the end of players div
 				for(i = tokens.length - 1 ; i < 5 ; i++) {
@@ -223,6 +245,44 @@ onload = function() {
 		handleHoursPlayed(4);
 	}
 	
+	function handleLoadStopFriendsClient(event) {
+		document.getElementById('friends_client').executeScript({ code: 'document.getElementById("friendListForm").innerHTML' }, function(result) {
+			html = new String(result);
+			
+			var tokens = html.split('friendBlockLinkOverlay" href="');
+			
+			var friends = [];
+			
+			for( i = 1; i < tokens.length ; i++ ) {
+				var link = tokens[i].split('">')[0];
+				
+				friends.push(link);
+			}
+			
+			clientFriends = friends;
+		});
+	}
+	
+	function handleLoadStopFriends0(event) {
+		handlerFriends(0);
+	}
+	
+	function handleLoadStopFriends1(event) {
+		handlerFriends(1);
+	}
+	
+	function handleLoadStopFriends2(event) {
+		handlerFriends(2);
+	}
+	
+	function handleLoadStopFriends3(event) {
+		handlerFriends(3);
+	}
+	
+	function handleLoadStopFriends4(event) {
+		handlerFriends(4);
+	}
+	
 	function handleHoursPlayed(player) {
 		document.getElementById('player_' + player).executeScript({ code: 'document.getElementById("game_204300").innerHTML.split("<h5>")[1].split(" ")[0]' }, function(result) {
 			hours = new String(result);
@@ -244,6 +304,30 @@ onload = function() {
 		});
 	}
 	
+	function handlerFriends(player) {
+		document.getElementById('friends_' + player).executeScript({ code: 'document.getElementById("memberList").innerHTML' }, function(result) {
+			html = new String(result);
+			
+			var tokens = html.split('friendBlockLinkOverlay" href="');
+			
+			var friendsList = [];
+			
+			for( i = 1; i < tokens.length ; i++ ) {
+				var link = tokens[i].split('">')[0];
+				
+				friendsList.push(link);
+			}
+			
+			if(currentPlayers[player] != undefined) {
+				cachePlayers[currentPlayers[player]]["friends"] = friendsList;
+				
+				chrome.storage.local.set({'cachePlayers': cachePlayers});
+				
+				updatePremades();
+			}
+		});
+	}
+	
 	function handleConnected(url, type) {
 		if(url == "") {
 			// no connected
@@ -259,6 +343,7 @@ onload = function() {
 			webview.executeScript({ code: "document.getElementsByClassName('menuitem supernav username')[0].innerHTML" }, function(result) {				
 				document.getElementById('profile_name').innerHTML = result;
 				webview.src = getFriendsPlayersUrl();
+				document.getElementById('friends_client').src = getFriendsUrl();
 			});
 		}
 	}
@@ -277,7 +362,9 @@ onload = function() {
 	function isCachedProfile(profileUrl) {
 		if(cachePlayers[profileUrl] == undefined) {
 			return false;
-		} else if (Date.now() - cachePlayers[profileUrl]["time"] > 60000) {
+		} else if (cachePlayers[profileUrl]["name"] == undefined || cachePlayers[profileUrl]["hours"] == undefined || cachePlayers[profileUrl]["time"] == undefined || cachePlayers[profileUrl]["friends"] == undefined) {
+			return false;
+		} else if (Date.now() - cachePlayers[profileUrl]["time"] > 60000*10) {
 			return false;
 		} else {
 			return true;
@@ -299,6 +386,83 @@ onload = function() {
 		}
 		
 		recentlyPlayedWith.innerHTML = html;
+	}
+	
+	function updatePremades() {	
+		generation = true;
+		var friends = [];
+		for (var i = 0; i < currentPlayers.length + 1; i++) {
+			friends[i] = [];
+		}
+		
+		friends[0][0] = 0;		
+		for( i = 0 ; i < currentPlayers.length ; i++) {
+			var profileUrl = currentPlayers[i];
+			if(clientFriends.contains(profileUrl)) {
+				friends[0][i + 1] = 1;
+				friends[i + 1][0] = 1;
+			} else {
+				friends[0][i + 1] = 0;
+				friends[i + 1][0] = 0;
+			}
+		}
+		
+		for( i = 0 ; i < currentPlayers.length ; i++) {
+			var profileUrlI = currentPlayers[i];
+			
+			for( j = 0 ; j < currentPlayers.length ; j++) {
+				var profileUrlJ = currentPlayers[j];
+				
+				if(isCachedProfile(profileUrlI) && isCachedProfile(profileUrlJ)) {
+					if(cachePlayers[profileUrlI]["friends"].contains(profileUrlJ)) {
+						friends[i + 1][j + 1] = 1;
+					} else {
+						friends[i + 1][j + 1] = 0;
+					}
+				} else {				
+					friends[i + 1][j + 1] = 2;
+					generation = false;
+				}				
+			}
+		}
+		
+		for( i = 1 ; i < currentPlayers.length + 1 ; i++) {
+			for( j = 1 ; j < currentPlayers.length + 1 ; j++) {
+				if(friends[i][j] == 1) {
+					friends[j][i] = 1;
+				}
+			}
+		}
+		
+		if(generation) {
+			currentFriends = friends;
+			
+			document.getElementById('teams_list').innerHTML = "";
+			
+			for ( i = 0 ; i < friends.length ; i++ ) {
+				for ( j = i ; j < friends.length ; j++ ) {
+					if ( j != i && friends[i][j] == 1) {
+						for ( k = j ; k < friends.length ; k++ ) {
+							if ( k != j && k != i && friends[j][k] == 1 && friends[i][k] == 1) {
+								console.log("PREMADE " + getFriendPlayerName(i) + ", " + getFriendPlayerName(j) + " and " + getFriendPlayerName(k));
+								document.getElementById('teams_list').innerHTML += "premade : " + getFriendPlayerName(i) + ", " + getFriendPlayerName(j) + " and " + getFriendPlayerName(k) + "<br />";
+							}
+						}
+						console.log("DUOQ " + getFriendPlayerName(i) + " and " + getFriendPlayerName(j));
+						document.getElementById('teams_list').innerHTML += "duoq : " + getFriendPlayerName(i) + " and " + getFriendPlayerName(j) + "<br />";
+					}
+				}
+			}
+		}
+		
+		/*str = "";
+		for (var i = 0; i < currentPlayers.length + 1; i++) {
+			for (var j = 0; j < currentPlayers.length + 1; j++) {
+				str += friends[i][j] + " ";
+			}
+			str += "\n";
+		}
+		console.log(str);*/
 	}
 	
 	function checkVersion() {
@@ -331,6 +495,19 @@ onload = function() {
 		xhrOnline.send();
 	}
 	
+	function banPlayer(profileUrl) {
+		banPlayers.push(profileUrl);
+		chrome.storage.local.set({'banPlayers': banPlayers});
+	}
+	
+	function unbanPlayer(profileUrl) {
+		var index = banPlayers.indexOf("profileUrl");
+		if(index != -1) {
+			banPlayers.splice(index, 1);
+			chrome.storage.local.set({'banPlayers': banPlayers});
+		}
+	}
+	
 	function getProfileUrl() {
 		return "http://steamcommunity.com/" + profileType + "/" + profileName;
 	}
@@ -343,13 +520,25 @@ onload = function() {
 		return getProfileUrl() + "/friends/players/";
 	}
 	
+	function getFriendPlayerName(player) {
+		if(player == 0) {
+			return "me";
+		} else {
+			return cachePlayers[currentPlayers[player-1]]["name"];
+		}
+	}
+	
 	function showMessage(message) {
+		teams.style.display = "none";
+		
 		document.getElementById('message').innerHTML = message;
 		document.getElementById('message').style.visibility = "visible";
 	}
 	
 	function hideMessage() {
 		document.getElementById('message').style.visibility = "hidden";
+		
+		teams.style.display = "initial";
 	}
 }
 
@@ -360,3 +549,13 @@ Object.size = function(obj) {
     }
     return size;
 };
+
+Array.prototype.contains = function(obj) {
+    var i = this.length;
+    while (i--) {
+        if (this[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+}

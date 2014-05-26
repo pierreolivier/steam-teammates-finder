@@ -1,5 +1,3 @@
 ban player
 notification if player has less than x hours played
-associate players to create a premade
-premade estimation (common friends, private profiles)
 detect laggy players
