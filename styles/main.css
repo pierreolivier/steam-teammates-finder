@@ -43,15 +43,15 @@ body {
 
 #players {
 	position: absolute;
-	width: 30%;
-	left: 15%;
+	width: 40%;
+	left: 10%;
 	top: 220px;
 	font-size: 27px;	
 	visibility: visible;
 }
 #teams {
 	position: absolute;
-	width: 40%;
+	width: 45%;
 	right: 5%;
 	top: 220px;
 	font-size: 27px;	

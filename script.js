@@ -70,9 +70,10 @@ onload = function() {
 		console.log(cachePlayers);
 	});
 	
-	chrome.storage.local.get('banPlayers', function(items) {
-		banPlayers = items['banPlayers'];
-		
+	chrome.storage.local.get('banPlayers', function(items) {		
+		if(items['banPlayers'] != undefined) {
+			banPlayers = items['banPlayers'];
+		}
 		console.log(banPlayers);
 	});
 	
@@ -351,7 +352,33 @@ onload = function() {
 	}
 	
 	function setName(player, name, link) {
-		document.getElementById('name_player_' + player).innerHTML = "<a href='" + link + "' target='_blank'>" + name + "</a>";
+		if(name != "") {
+			if(!banPlayers.contains(link)) {
+				document.getElementById('name_player_' + player).innerHTML = "<a href='" + link + "' target='_blank'>" + name + "</a> <a id='ban_player_" + player + "' href='#'>ban</a>";
+				document.getElementById('ban_player_' + player).addEventListener("click", function() {
+					if(!banPlayers.contains(link)) {
+						banPlayer(link);
+						this.innerHTML = "unban";
+					} else {
+						unbanPlayer(link);
+						this.innerHTML = "ban";
+					}
+				});
+			} else {
+				document.getElementById('name_player_' + player).innerHTML = "<a href='" + link + "' target='_blank'>" + name + "</a> <a id='ban_player_" + player + "' href='#'>unban</a>";
+				document.getElementById('ban_player_' + player).addEventListener("click", function() {
+					if(!banPlayers.contains(link)) {
+						banPlayer(link);
+						this.innerHTML = "unban";
+					} else {
+						unbanPlayer(link);
+						this.innerHTML = "ban";
+					}
+				});
+			}
+		} else {
+			document.getElementById('name_player_' + player).innerHTML = "";
+		}		
 	}
 	
 	function setHours(player, hours) {
@@ -520,19 +547,6 @@ onload = function() {
 		xhrOnline.send();
 	}
 	
-	function banPlayer(profileUrl) {
-		banPlayers.push(profileUrl);
-		chrome.storage.local.set({'banPlayers': banPlayers});
-	}
-	
-	function unbanPlayer(profileUrl) {
-		var index = banPlayers.indexOf("profileUrl");
-		if(index != -1) {
-			banPlayers.splice(index, 1);
-			chrome.storage.local.set({'banPlayers': banPlayers});
-		}
-	}
-	
 	function getProfileUrl() {
 		return "http://steamcommunity.com/" + profileType + "/" + profileName;
 	}
@@ -572,6 +586,21 @@ onload = function() {
 		document.getElementById('message').style.visibility = "hidden";
 		
 		teams.style.display = "initial";
+	}
+}
+	
+function banPlayer(profileUrl) {
+	if(!banPlayers.contains(profileUrl)) {
+		banPlayers.push(profileUrl);
+		chrome.storage.local.set({'banPlayers': banPlayers});
+	}	
+}
+
+function unbanPlayer(profileUrl) {
+	var index = banPlayers.indexOf(profileUrl);
+	if(index != -1) {
+		banPlayers.splice(index, 1);
+		chrome.storage.local.set({'banPlayers': banPlayers});
 	}
 }
 
