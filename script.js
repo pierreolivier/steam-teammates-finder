@@ -354,7 +354,7 @@ onload = function() {
 	function setName(player, name, link) {
 		if(name != "") {
 			if(!banPlayers.contains(link)) {
-				document.getElementById('name_player_' + player).innerHTML = "<a href='" + link + "' target='_blank'>" + name + "</a> <a id='ban_player_" + player + "' href='#'>ban</a>";
+				document.getElementById('name_player_' + player).innerHTML = "<a href='" + link + "' target='_blank'>" + name + "</a> <a id='ban_player_" + player + "' href='#'></a>";
 				document.getElementById('ban_player_' + player).addEventListener("click", function() {
 					if(!banPlayers.contains(link)) {
 						banPlayer(link);
@@ -365,7 +365,7 @@ onload = function() {
 					}
 				});
 			} else {
-				document.getElementById('name_player_' + player).innerHTML = "<a href='" + link + "' target='_blank'>" + name + "</a> <a id='ban_player_" + player + "' href='#'>unban</a>";
+				document.getElementById('name_player_' + player).innerHTML = "<a href='" + link + "' target='_blank'>" + name + "</a> <a id='ban_player_" + player + "' href='#'></a>";
 				document.getElementById('ban_player_' + player).addEventListener("click", function() {
 					if(!banPlayers.contains(link)) {
 						banPlayer(link);
