@@ -1,15 +1,11 @@
-Awesomenauts Teammates Finder
+Steam Teammates Finder
 =============================
 
-Images provide from the game Awesomenauts
+Images provide from Steam
 
-http://www.awesomenauts.com/
+http://steampowered.com/
 
-http://store.steampowered.com/app/204300/
-
-
-
-This Google Chrome app allows players to see against who they are playing, even during the character selection.
+This Google Chrome app allows players to see against who they are playing.
 
 INSTALL
 =============================

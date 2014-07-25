@@ -1,17 +1,17 @@
 html, body {
   height: 100%;
   font-family: Arial, sans-serif;    
-  color: #3C8BAC;
+  color: white;
 }
 
 a {
-	color: #3C8BAC;
+  color: white;
 }
 
 body {
-  background-position: center -450px;
+  background-position: center -0px;
   background-repeat: no-repeat;
-  background-image: url("../assets/background.jpg"), -webkit-radial-gradient(center, ellipse cover,#FFFFFF 0%,#FAFAFA 50%,#F5F5F5 60%,#BEBEBE 100%);
+  background-image: url("../assets/background.png"), -webkit-radial-gradient(center, ellipse cover,#FFFFFF 0%,#FAFAFA 50%,#F5F5F5 60%,#BEBEBE 100%);
   margin: 0;
   padding: 0;
 }
@@ -45,7 +45,7 @@ body {
 	position: absolute;
 	width: 40%;
 	left: 10%;
-	top: 220px;
+	top: 120px;
 	font-size: 27px;	
 	visibility: visible;
 }
@@ -53,7 +53,7 @@ body {
 	position: absolute;
 	width: 45%;
 	right: 5%;
-	top: 220px;
+	top: 120px;
 	font-size: 27px;	
 	visibility: visible;
 }
@@ -63,12 +63,12 @@ body {
 
 #recently_played_with_panel {
 	position: absolute;
-	width: 50%;
-	left: 25%;
-	top:220px;
+	width: 70%;
+	left: 15%;
+	top:100px;
 	font-size: 20px;
 	overflow-y: scroll;
-	height:450px;	
+	height:550px;	
 	display: none;
 }
 

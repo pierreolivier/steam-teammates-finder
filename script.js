@@ -188,7 +188,7 @@ onload = function() {
 			
 			
 		} else if (url == getFriendsUrl()) {
-			// handle awesomenauts not started
+			// handle no game started
 			
 			// clear players div
 			for(i=0;i<5;i++) {
@@ -197,7 +197,7 @@ onload = function() {
 			}
 			
 			// show the message
-			showMessage("Awesomenauts is not started<br /><a href='steam://run/204300' target='_blank'>Launch</a>");
+			showMessage("No game started");
 			
 			// pulling
 			clearTimeout(timer);
@@ -519,7 +519,7 @@ onload = function() {
 	
 	function checkVersion() {
 		var xhrOnline = new XMLHttpRequest();
-		xhrOnline.open('GET', 'https://raw.githubusercontent.com/pierreolivier/awesomenauts-teammates-finder/master/app.version', true);
+		xhrOnline.open('GET', 'https://raw.githubusercontent.com/pierreolivier/steam-teammates-finder/master/app.version', true);
 		xhrOnline.onload = function(e) {
 			if (this.status == 200) {
 				var onlineVersion = this.responseText;
