@@ -135,6 +135,10 @@ onload = function() {
 				
 				// for each player in the lobby
 				for(i=1;i<tokens.length;i++) {
+					if ( i > 5 ) {
+						break;
+					}
+					
 					var connectionTokens = tokens[i].split('href="');
 					var linkTokens = connectionTokens[1].split('">');
 					var nameTokens = linkTokens[1].split('</a><br>');
@@ -167,7 +171,7 @@ onload = function() {
 				updatePremades();
 				
 				// clear the end of players div
-				for(i = tokens.length - 1 ; i < 5 ; i++) {
+				for(i = tokens.length - 1 ; i < 5 ; i++) {					
 					setName(i, "", "");
 					setHours(i, "");
 				}
@@ -468,9 +472,10 @@ onload = function() {
 			
 			document.getElementById('teams_list').innerHTML = "";
 			
-			// to remove duoq generated thanks to a premade
-			lastPremade = [];
-			lastPremadeCount = 0;
+			// to remove duoq generated thanks to a premade			
+			var premades = [];
+			var duoqsIndexes = [];
+			var duoqs = [];
 			
 			for ( i = 0 ; i < friends.length ; i++ ) { // for each player
 				for ( j = i ; j < friends.length ; j++ ) { // check if each others are friends
@@ -478,33 +483,60 @@ onload = function() {
 						for ( k = j ; k < friends.length ; k++ ) { // if too players are friends, check if a third can be friend
 							if ( k != j && k != i && friends[j][k] == 1 && friends[i][k] == 1) {
 								// new premade								
-								console.log("PREMADE " + getFriendPlayerName(i) + ", " + getFriendPlayerName(j) + " and " + getFriendPlayerName(k));
-								document.getElementById('teams_list').innerHTML += "premade : " + getFriendPlayerName(i) + ", " + getFriendPlayerName(j) + " and " + getFriendPlayerName(k) + "<br />";
-								
-								// to delete duoq
-								lastPremade = [getFriendPlayerProfil(i), getFriendPlayerProfil(j), getFriendPlayerProfil(k)];
-								lastPremadeCount = 0;
+								premades.push([i, j, k]);
 							}
 						}
 						
 						// if duoq is not generated thanks to a premade
-						if (!lastPremade.contains(getFriendPlayerProfil(i)) && !lastPremade.contains(getFriendPlayerProfil(j))) {
-							// new duoq
-							console.log("DUOQ " + getFriendPlayerName(i) + " and " + getFriendPlayerName(j));
-							document.getElementById('teams_list').innerHTML += "duoq : " + getFriendPlayerName(i) + " and " + getFriendPlayerName(j) + "<br />";
+						if (!duoqInPremade(premades, i, j)) {
+							duoqsIndexes.push([i, j]);							
 						} else {
-							console.log("REMOVED DUOQ " + getFriendPlayerName(i) + " and " + getFriendPlayerName(j));
-							
-							// remove 3 duoq at maximum
-							lastPremadeCount++;							
-							if(lastPremadeCount == 3) {
-								lastPremadeCount = 0;
-								lastPremade = [];
-							}
+							console.log('useless duoq');
 						}
 					}
 				}
 			}
+			
+			// premade with duoqs
+			for (var i = 0 ; i < duoqsIndexes.length ; i++) {
+				for (var j = i ; j < duoqsIndexes.length ; j++) {
+					if (j != i) {
+						if (duoqsIndexes[j][0] == duoqsIndexes[i][0]) {												
+							premades.push([duoqsIndexes[i][0], duoqsIndexes[i][1], duoqsIndexes[j][1]]);
+							console.log('rematch !');
+						} else if (duoqsIndexes[j][1] == duoqsIndexes[i][0]) {
+							premades.push([duoqsIndexes[i][0], duoqsIndexes[i][1], duoqsIndexes[j][0]]);
+							console.log('rematch !');
+						} else if (duoqsIndexes[j][0] == duoqsIndexes[i][1]) {
+							premades.push([duoqsIndexes[i][0], duoqsIndexes[i][1], duoqsIndexes[j][1]]);
+							console.log('rematch !');
+						} else if (duoqsIndexes[j][1] == duoqsIndexes[i][1]) {
+							premades.push([duoqsIndexes[i][0], duoqsIndexes[i][1], duoqsIndexes[j][0]]);
+							console.log('rematch !');
+						}
+					}
+				}
+			}
+			
+			// clean duoqs
+			for (var i = 0 ; i < duoqsIndexes.length ; i++) {
+				if (!duoqInPremade(premades, duoqsIndexes[i][0], duoqsIndexes[i][1])) {
+					duoqs.push([duoqsIndexes[i][0], duoqsIndexes[i][1]]);
+				}
+			}
+			
+			// show premades
+			for (var i = 0 ; i < premades.length ; i++) {
+				console.log("PREMADE " + getFriendPlayerName(premades[i][0]) + ", " + getFriendPlayerName(premades[i][1]) + " and " + getFriendPlayerName(premades[i][2]));
+				document.getElementById('teams_list').innerHTML += "premade : " + getFriendPlayerName(premades[i][0]) + ", " + getFriendPlayerName(premades[i][1]) + " and " + getFriendPlayerName(premades[i][2]) + "<br />";
+			}
+			
+			// show duoqs
+			for (var i = 0 ; i < duoqs.length ; i++) {
+				document.getElementById('teams_list').innerHTML += "duoq : " + getFriendPlayerName(duoqs[i][0]) + " and " + getFriendPlayerName(duoqs[i][1]) + "<br />";
+			}
+			
+			console.log('done !');
 		}
 		
 		/*str = "";
@@ -515,6 +547,16 @@ onload = function() {
 			str += "\n";
 		}
 		console.log(str);*/
+	}
+	
+	function duoqInPremade(premades, player1, player2) {
+		for (var i = 0; i < premades.length ; i++) {
+			if ( premades[i].contains(player1) && premades[i].contains(player2) ) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	function checkVersion() {
