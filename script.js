@@ -61,7 +61,7 @@ onload = function() {
 	
 	chrome.storage.local.get('cachePlayers', function(items) {
 		// cache limit
-		if(Object.size(items['cachePlayers']) < 60) {
+		if(Object.size(items['cachePlayers']) < 60 && Object.size(items['cachePlayers']) > 0) {
 			cachePlayers = items['cachePlayers'];
 		}
 		
